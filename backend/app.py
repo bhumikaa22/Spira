@@ -1,0 +1,48 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import openai
+from openai import OpenAI
+
+lient = OpenAI(api_key="your-api-key-here")
+
+response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a helpful English speaking assistant."},
+        {"role": "user", "content": "hello"},
+    ]
+)
+
+print(response.choices[0].message.content)
+
+app = Flask(__name__)
+CORS(app)  # Allow requests from frontend
+
+# Replace with your own OpenAI API key
+openai.api_key = "sk-..."
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    data = request.get_json()
+    user_message = data.get("message")
+    situation = data.get("situation")
+
+    if not user_message or not situation:
+        return jsonify({"error": "Missing message or situation"}), 400
+
+    prompt = f"You are an English-speaking practice partner. The situation is: '{situation}'. The user says: '{user_message}'. Reply in simple, polite English as a native speaker would."
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # or "gpt-4" if you have access
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=150
+        )
+        bot_reply = response['choices'][0]['message']['content']
+        return jsonify({"reply": bot_reply})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(debug=True)

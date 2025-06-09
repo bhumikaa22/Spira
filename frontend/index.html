@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>English Speaking Bot</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🗣️ English Speaking Practice Bot</h1>
+
+    <label for="situation">Choose a Situation:</label>
+    <select id="situation">
+      <option value="">-- Select --</option>
+      <option value="Ordering Food at a Restaurant">Ordering Food at a Restaurant</option>
+      <option value="Job Interview">Job Interview</option>
+      <option value="Asking for Directions">Asking for Directions</option>
+      <option value="Introducing Yourself">Introducing Yourself</option>
+      <option value="Talking to a Classmate">Talking to a Classmate</option>
+      <option value="Visiting a Doctor">Visiting a Doctor</option>
+      <option value="Shopping at a Store">Shopping at a Store</option>
+      <option value="Making a Hotel Reservation">Making a Hotel Reservation</option>
+      <option value="Talking to a Taxi Driver">Talking to a Taxi Driver</option>
+      <option value="Making a Phone Call">Making a Phone Call</option>
+    </select>
+
+    <div id="chatbox" class="chatbox">
+      <!-- Bot and user messages will go here -->
+    </div>
+
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Type your reply..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
