@@ -21,8 +21,6 @@ print(response.choices[0].message.content)
 app = Flask(__name__)
 CORS(app)  # Allow requests from frontend
 
-# Replace with your own OpenAI API key
-openai.api_key = "sk-..."
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -37,7 +35,7 @@ def chat():
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # or "gpt-4" if you have access
+            model="gpt-3.5-turbo",  
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
             max_tokens=150

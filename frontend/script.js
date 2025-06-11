@@ -38,4 +38,40 @@ async function sendMessage() {
   
     document.getElementById("userInput").value = "";
   }
-  
+function startVoiceInput() {
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.lang = "en-US";
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  const micBtn = document.getElementById("micButton");
+  const status = document.getElementById("status");
+
+  // Show listening status and visual effect
+  status.textContent = "🎤 Listening...";
+  micBtn.style.backgroundColor = "#34d399"; // Tailwind green
+  micBtn.style.borderRadius = "50%";
+
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    const spokenText = event.results[0][0].transcript;
+    document.getElementById("userInput").value = spokenText;
+    sendMessage(); // Auto-send the spoken input
+
+    // Reset UI
+    micBtn.style.backgroundColor = "";
+    status.textContent = "";
+  };
+
+  recognition.onerror = function(event) {
+    alert("Voice recognition error: " + event.error);
+    micBtn.style.backgroundColor = "";
+    status.textContent = "";
+  };
+
+  recognition.onend = function() {
+    micBtn.style.backgroundColor = "";
+    status.textContent = "";
+  };
+}
