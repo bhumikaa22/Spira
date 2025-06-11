@@ -3,7 +3,8 @@ async function sendMessage() {
     const chatbox = document.getElementById("chatbox");
     const situation = document.getElementById("situation").value;
   
-    if (userInput.trim() === "" || situation === "") return;
+if (userInput.trim() === "") return;
+
   
     // Show user message
     const userMsg = document.createElement("p");

@@ -28,8 +28,14 @@ def chat():
     user_message = data.get("message")
     situation = data.get("situation")
 
-    if not user_message or not situation:
-        return jsonify({"error": "Missing message or situation"}), 400
+    if not user_message:
+         return jsonify({"error": "Missing message"}), 400
+
+    if situation:
+        prompt = f"You are an English-speaking practice partner. The situation is: '{situation}'. The user says: '{user_message}'. Reply in simple, polite English as a native speaker would."
+    else:
+        prompt = f"The user says: '{user_message}'. Reply in simple, polite English and keep the conversation going."
+
 
     prompt = f"You are an English-speaking practice partner. The situation is: '{situation}'. The user says: '{user_message}'. Reply in simple, polite English as a native speaker would."
 
