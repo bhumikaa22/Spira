@@ -4,29 +4,30 @@ from dotenv import load_dotenv
 import os
 import requests
 
-load_dotenv() 
+load_dotenv()
 app = Flask(__name__)
-CORS(app)  # Allow requests from frontend
+CORS(app)
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
 HEADERS = {
     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
     "Content-Type": "application/json",
-    "HTTP-Referer": "https://github.com/bhumikaa22/Spira"  
+    "HTTP-Referer": "https://github.com/bhumikaa22/Spira"  # ✅ Must be a valid public link
 }
 
-MODEL_NAME = "google/gemini-pro" 
+MODEL_NAME = "openai/gpt-3.5-turbo"  # fallback that always works
 
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.get_json()
-    message = data.get("message")
-    situation = data.get("situation")
+    user_message = data.get("message")
+    situation = data.get("situation", "")
 
-    if not message:
-         return jsonify({"error": "Missing message"}), 400
+    if not user_message:
+        return jsonify({"error": "Message is missing"}), 400
 
-    prompt = f"The situation is: {situation}. The user says: {message}" if situation else message
+    prompt = f"The situation is: {situation}. The user says: {user_message}" if situation else user_message
 
     body = {
         "model": MODEL_NAME,
