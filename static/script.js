@@ -35,6 +35,7 @@ async function sendMessage() {
         botMsg.textContent = "🤖 Bot: " + botReply;
         chatbox.appendChild(botMsg);
         messageHistory.push({ role: "assistant", content: botReply });
+        speakText(botReply);
         chatbox.scrollTop = chatbox.scrollHeight;
 
     } catch (error) {
@@ -109,3 +110,17 @@ document.addEventListener('DOMContentLoaded', () => {
         micButton.onclick = startVoiceInput; 
     }
 });
+
+function speakText(text) {
+
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1; // Speed of speech (0.1 to 10)
+        utterance.pitch = 1; // Pitch of speech (0 to 2)
+
+        // Speak the text
+        window.speechSynthesis.speak(utterance);
+    } else {
+        console.log("Sorry, your browser doesn't support text-to-speech.");
+    }
+}
