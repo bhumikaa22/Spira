@@ -12,6 +12,7 @@ async function sendMessage() {
     chatbox.appendChild(userMsg);
   
     messageHistory.push({ role: "user", content: userInput });
+    getGrammarFeedback(userInput);
     
     // Clear the input field immediately 
     userInputElem.value = ""; 
@@ -123,4 +124,36 @@ function speakText(text) {
     } else {
         console.log("Sorry, your browser doesn't support text-to-speech.");
     }
+}
+
+async function getGrammarFeedback(text) {
+    try {
+        const response = await fetch("http://127.0.0.1:5000/check_grammar", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        });
+        const data = await response.json();
+        if (data.corrections && data.corrections.length > 0) {
+            displayGrammarSuggestions(data.corrections);
+        }
+    } catch (error) {
+        console.error("Error fetching grammar feedback:", error);
+    }
+}
+
+function displayGrammarSuggestions(corrections) {
+    const chatbox = document.getElementById("chatbox");
+    const suggestionsContainer = document.createElement('div');
+    suggestionsContainer.className = 'suggestions';
+
+    let suggestionsHTML = '💡 **Suggestions:**<ul>';
+    corrections.forEach(correction => {
+        suggestionsHTML += `<li>${correction.message} (e.g., "${correction.replacements[0]}")</li>`;
+    });
+    suggestionsHTML += '</ul>';
+
+    suggestionsContainer.innerHTML = suggestionsHTML;
+    chatbox.appendChild(suggestionsContainer);
+    chatbox.scrollTop = chatbox.scrollHeight;
 }
