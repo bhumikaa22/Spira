@@ -1,3 +1,5 @@
+const messageHistory = [];
+
 async function sendMessage() {
     const userInput = document.getElementById("userInput").value;
     const chatbox = document.getElementById("chatbox");
@@ -11,30 +13,36 @@ if (userInput.trim() === "") return;
     userMsg.textContent = "🧑 You: " + userInput;
     chatbox.appendChild(userMsg);
   
+      messageHistory.push({ role: "user", content: userInput });
     // Send to backend
-    try {
-      const response = await fetch("http://127.0.0.1:5000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: userInput,
-          situation: situation
-        })
-      });
-  
-      const data = await response.json();
-  
-      const botMsg = document.createElement("p");
-      botMsg.textContent = "🤖 Bot: " + (data.reply || data.error);
-      chatbox.appendChild(botMsg);
-  
-      chatbox.scrollTop = chatbox.scrollHeight;
+try {
+        const response = await fetch("http://127.0.0.1:5000/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message_history: messageHistory, // Send the whole array
+                situation: situation
+            })
+        });
+
+        const data = await response.json();
+        const botReply = data.reply || data.error || "Sorry, I didn't get a response.";
+
+        const botMsg = document.createElement("p");
+        botMsg.textContent = "🤖 Bot: " + botReply;
+        chatbox.appendChild(botMsg);
+        messageHistory.push({ role: "assistant", content: botReply });
+
+        // Auto-scroll to the bottom
+        chatbox.scrollTop = chatbox.scrollHeight;
+
     } catch (error) {
-      const botMsg = document.createElement("p");
-      botMsg.textContent = "🤖 Bot: Error reaching server.";
-      chatbox.appendChild(botMsg);
+        console.error("Fetch Error:", error);
+        const botMsg = document.createElement("p");
+        botMsg.textContent = "🤖 Bot: Error reaching the server. Please check the console.";
+        chatbox.appendChild(botMsg);
     }
   
     document.getElementById("userInput").value = "";
@@ -59,10 +67,6 @@ function startVoiceInput() {
     const spokenText = event.results[0][0].transcript;
     document.getElementById("userInput").value = spokenText;
     sendMessage(); // Auto-send the spoken input
-
-    // Reset UI
-    micBtn.style.backgroundColor = "";
-    status.textContent = "";
   };
 
   recognition.onerror = function(event) {
@@ -76,3 +80,20 @@ function startVoiceInput() {
     status.textContent = "";
   };
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sendButton = document.getElementById('sendButton'); // Assuming you have a send button with this ID
+    const userInput = document.getElementById('userInput');
+
+    if (sendButton) {
+        sendButton.onclick = sendMessage;
+    }
+
+    if (userInput) {
+        userInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
+});
