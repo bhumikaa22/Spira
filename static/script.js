@@ -1,28 +1,29 @@
 const messageHistory = [];
 
 async function sendMessage() {
-    const userInput = document.getElementById("userInput").value;
+    const userInputElem = document.getElementById("userInput");
+    const userInput = userInputElem.value;
     const chatbox = document.getElementById("chatbox");
     const situation = document.getElementById("situation").value;
   
-if (userInput.trim() === "") return;
-
-  
-    // Show user message
+    if (userInput.trim() === "") return;
     const userMsg = document.createElement("p");
     userMsg.textContent = "🧑 You: " + userInput;
     chatbox.appendChild(userMsg);
   
-      messageHistory.push({ role: "user", content: userInput });
-    // Send to backend
-try {
+    messageHistory.push({ role: "user", content: userInput });
+    
+    // Clear the input field immediately 
+    userInputElem.value = ""; 
+
+    try {
         const response = await fetch("http://127.0.0.1:5000/chat", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                message_history: messageHistory, // Send the whole array
+                message_history: messageHistory,
                 situation: situation
             })
         });
@@ -34,8 +35,6 @@ try {
         botMsg.textContent = "🤖 Bot: " + botReply;
         chatbox.appendChild(botMsg);
         messageHistory.push({ role: "assistant", content: botReply });
-
-        // Auto-scroll to the bottom
         chatbox.scrollTop = chatbox.scrollHeight;
 
     } catch (error) {
@@ -44,46 +43,54 @@ try {
         botMsg.textContent = "🤖 Bot: Error reaching the server. Please check the console.";
         chatbox.appendChild(botMsg);
     }
-  
-    document.getElementById("userInput").value = "";
-  }
-function startVoiceInput() {
-  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-  recognition.lang = "en-US";
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  const micBtn = document.getElementById("micButton");
-  const status = document.getElementById("status");
-
-  // Show listening status and visual effect
-  status.textContent = "🎤 Listening...";
-  micBtn.style.backgroundColor = "#34d399"; // Tailwind green
-  micBtn.style.borderRadius = "50%";
-
-  recognition.start();
-
-  recognition.onresult = function(event) {
-    const spokenText = event.results[0][0].transcript;
-    document.getElementById("userInput").value = spokenText;
-    sendMessage(); // Auto-send the spoken input
-  };
-
-  recognition.onerror = function(event) {
-    alert("Voice recognition error: " + event.error);
-    micBtn.style.backgroundColor = "";
-    status.textContent = "";
-  };
-
-  recognition.onend = function() {
-    micBtn.style.backgroundColor = "";
-    status.textContent = "";
-  };
 }
 
+function startVoiceInput() {
+    const micBtn = document.getElementById("micButton");
+    const status = document.getElementById("status");
+    const userInputElem = document.getElementById("userInput");
+
+    if (!('webkitSpeechRecognition' in window)) {
+        status.textContent = "Sorry, voice recognition is not supported in this browser.";
+        return;
+    }
+  
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    status.textContent = "🎤 Listening...";
+    micBtn.disabled = true;
+
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const spokenText = event.results[0][0].transcript;
+        userInputElem.value = spokenText;
+        setTimeout(sendMessage, 300); 
+    };
+
+    // When an error occurs
+    recognition.onerror = function(event) {
+        console.error("Voice recognition error: ", event.error);
+        status.textContent = "Error: " + event.error;
+    };
+
+    // When recognition ends (either successfully or with an error)
+    recognition.onend = function() {
+        // Reset the UI
+        micBtn.disabled = false;
+        // Clear status after a second
+        setTimeout(() => { status.textContent = ""; }, 1000);
+    };
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
-    const sendButton = document.getElementById('sendButton'); // Assuming you have a send button with this ID
+    const sendButton = document.getElementById('sendButton');
     const userInput = document.getElementById('userInput');
+    const micButton = document.getElementById('micButton'); // Find the mic button
 
     if (sendButton) {
         sendButton.onclick = sendMessage;
@@ -92,8 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (userInput) {
         userInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
+                event.preventDefault(); 
                 sendMessage();
             }
         });
+    }
+
+    if (micButton) {
+        micButton.onclick = startVoiceInput; 
     }
 });
