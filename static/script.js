@@ -1,4 +1,6 @@
 const messageHistory = [];
+let mediaRecorder;
+let audioChunks = [];
 
 async function sendMessage() {
     const userInputElem = document.getElementById("userInput");
@@ -47,47 +49,118 @@ async function sendMessage() {
     }
 }
 
-function startVoiceInput() {
+async function sendMessage() {
+    console.log("1. startVoiceInput called");
     const micBtn = document.getElementById("micButton");
     const status = document.getElementById("status");
     const userInputElem = document.getElementById("userInput");
 
-    if (!('webkitSpeechRecognition' in window)) {
-        status.textContent = "Sorry, voice recognition is not supported in this browser.";
+    if (!('webkitSpeechRecognition' in window) || !navigator.mediaDevices) {
+        status.textContent = "Voice recognition or media devices not supported.";
         return;
     }
-  
+    try {
+        console.log("2. Requesting microphone access...");
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = event => {
+            console.log("Audio data available!");
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            console.log("4. MediaRecorder stopped. Creating Blob.");
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+            analyzeAudioFluency(audioBlob);
+
+            audioChunks = [];
+        };
+
+    } catch (err) {
+        console.error("Error accessing microphone:", err);
+        status.textContent = "Could not access microphone.";
+        return;
+    }
+
     const recognition = new webkitSpeechRecognition();
     recognition.lang = "en-US";
     recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+
+    mediaRecorder.start();
+    recognition.start();
 
     status.textContent = "🎤 Listening...";
     micBtn.disabled = true;
 
-    recognition.start();
-
     recognition.onresult = function(event) {
         const spokenText = event.results[0][0].transcript;
         userInputElem.value = spokenText;
-        setTimeout(sendMessage, 300); 
+        sendMessage(); 
     };
 
     // When an error occurs
     recognition.onerror = function(event) {
         console.error("Voice recognition error: ", event.error);
         status.textContent = "Error: " + event.error;
+        mediaRecorder.stop();
     };
 
-    // When recognition ends (either successfully or with an error)
     recognition.onend = function() {
-        // Reset the UI
+        if (mediaRecorder.state === "recording") {
+            mediaRecorder.stop();
+        }
         micBtn.disabled = false;
-        // Clear status after a second
         setTimeout(() => { status.textContent = ""; }, 1000);
     };
 }
 
+async function analyzeAudioFluency(audioBlob) {
+    console.log("5. analyzeAudioFluency called. Sending audio to backend.");
+    const formData = new FormData();
+    formData.append('audio_file', audioBlob, 'user_audio.webm');
+
+    try {
+        const response = await fetch('/analyze_fluency', {
+            method: 'POST',
+            body: formData  
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            displayFluencyScore(data);
+        } else {
+            console.error("Fluency analysis failed:", data.error);
+        }
+    } catch (error) {
+        console.error("Error sending audio for analysis:", error);
+    }
+}
+
+function displayFluencyScore(data) {
+    const chatbox = document.getElementById("chatbox");
+    const scoreContainer = document.createElement('div');
+    scoreContainer.className = 'suggestions'; //  can reuse the same style
+
+    // Build a user-friendly report
+    let scoreHTML = `
+        <details>
+            <summary><strong>📊 Your Fluency Report</strong></summary>
+            <ul>
+                <li><strong>Fluency Score:</strong> ${data.fluency_score}%</li>
+                <li><strong>Pauses Detected:</strong> ${data.num_pauses}</li>
+                <li><strong>Total Duration:</strong> ${data.duration}s</li>
+                <li><strong>Time Spent Speaking:</strong> ${data.speaking_time}s</li>
+            </ul>
+        </details>
+    `;
+
+    scoreContainer.innerHTML = scoreHTML;
+    chatbox.appendChild(scoreContainer);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const sendButton = document.getElementById('sendButton');
