@@ -1,3 +1,9 @@
-backend/.env
+# Ignore the environment variables file
+.env
 
+# Ignore Python cache folders and files
+__pycache__/
+*.pyc
 
+# Ignore virtual environment folder
+venv/
