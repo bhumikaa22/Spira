@@ -1,0 +1,21 @@
+{
+  "name": "Spira - English Speaking Practice",
+  "short_name": "Spira",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4A90E2",
+  "description": "An AI-powered bot to help you practice your English speaking skills.",
+  "icons": [
+    {
+      "src": "/static/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

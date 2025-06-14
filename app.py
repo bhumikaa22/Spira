@@ -1,16 +1,13 @@
+import language_tool_python
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import requests
-import language_tool_python
 
 load_dotenv()
 
-print(f"--- DEBUG: Loaded API Key is: {os.getenv('OPENROUTER_API_KEY')} ---")
-
 app = Flask(__name__)
-app.static_folder = 'static'
 
 CORS(app)
 
@@ -27,6 +24,10 @@ tool = language_tool_python.LanguageTool('en-US')
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route('/manifest.json')
+def serve_manifest():
+    return app.send_static_file('manifest.json')
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -89,7 +90,6 @@ def check_grammar():
     except Exception as e:
         print(f"Grammar check error: {e}")
         return jsonify({"error": "Failed to check grammar"}), 500
-
 
 if __name__ == "__main__":
     app.run(debug=True)

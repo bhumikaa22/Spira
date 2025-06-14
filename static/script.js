@@ -157,3 +157,15 @@ function displayGrammarSuggestions(corrections) {
     chatbox.appendChild(suggestionsContainer);
     chatbox.scrollTop = chatbox.scrollHeight;
 }
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/static/sw.js')
+            .then(registration => {
+                console.log('Service Worker registered successfully:', registration);
+            })
+            .catch(error => {
+                console.log('Service Worker registration failed:', error);
+            });
+    });
+}
