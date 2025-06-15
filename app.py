@@ -8,7 +8,7 @@ import language_tool_python
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "https://celebrated-hotteok-616c56.netlify.app"}})
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
