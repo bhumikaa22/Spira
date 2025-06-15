@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://your-spira-backend.onrender.com";
+const BACKEND_URL = "https://spira.onrender.com";
 
 // --- Global variables ---
 const messageHistory = [];
