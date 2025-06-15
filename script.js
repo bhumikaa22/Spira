@@ -21,7 +21,7 @@ async function sendMessage() {
     messageHistory.push({ role: "user", content: userInput });
     
     // Get grammar feedback for the typed text
-    getGrammarFeedback(userInput);
+    // getGrammarFeedback(userInput);
     
     // Clear the input field
     userInputElem.value = ""; 

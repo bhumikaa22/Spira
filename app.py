@@ -18,17 +18,20 @@ HEADERS = {
 }
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-def get_grammar_tool():
-    """
-    Gets the grammar tool instance. Creates it if it doesn't exist in the
-    current application context ('g'). This is safer for production servers.
-    """
-    if 'grammar_tool' not in g:
-        print("Initializing LanguageTool for this context...")
-        g.grammar_tool = language_tool_python.LanguageTool('en-US')
-        print("LanguageTool initialized.")
-    return g.grammar_tool
+# def get_grammar_tool():
+#     """
+#     Gets the grammar tool instance. Creates it if it doesn't exist in the
+#     current application context ('g'). This is safer for production servers.
+#     """
+#     if 'grammar_tool' not in g:
+#         print("Initializing LanguageTool for this context...")
+#         g.grammar_tool = language_tool_python.LanguageTool('en-US')
+#         print("LanguageTool initialized.")
+#     return g.grammar_tool
 
+@app.route("/")
+def home():
+    return app.send_static_file('index.html')
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -51,28 +54,28 @@ def chat():
         print(f"Chat Error: {e}")
         return jsonify({"error": "Failed to get chat reply"}), 500
     
-@app.route("/check_grammar", methods=["POST"])
-def check_grammar():
-    # Get the tool using our new safe function
-    tool = get_grammar_tool()
+# @app.route("/check_grammar", methods=["POST"])
+# def check_grammar():
+#     # Get the tool using our new safe function
+#     tool = get_grammar_tool()
     
-    data = request.json
-    text_to_check = data.get('text')
-    if not text_to_check:
-        return jsonify({"error": "No text provided"}), 400
-    try:
-        matches = tool.check(text_to_check)
-        corrections = []
-        for match in matches:
-            # We will only send the most essential data to avoid any errors
-            corrections.append({
-                'message': match.message,
-                'replacements': match.replacements[:2] # Send max 2 replacements
-            })
-        return jsonify({'corrections': corrections})
-    except Exception as e:
-        print(f"Grammar check error: {e}")
-        return jsonify({"error": "Failed to check grammar"}), 500
+#     data = request.json
+#     text_to_check = data.get('text')
+#     if not text_to_check:
+#         return jsonify({"error": "No text provided"}), 400
+#     try:
+#         matches = tool.check(text_to_check)
+#         corrections = []
+#         for match in matches:
+#             # We will only send the most essential data to avoid any errors
+#             corrections.append({
+#                 'message': match.message,
+#                 'replacements': match.replacements[:2] # Send max 2 replacements
+#             })
+#         return jsonify({'corrections': corrections})
+#     except Exception as e:
+#         print(f"Grammar check error: {e}")
+#         return jsonify({"error": "Failed to check grammar"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
