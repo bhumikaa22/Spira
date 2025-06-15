@@ -8,6 +8,6 @@ COPY requirements.txt .
 
 # Install Python libraries
 RUN pip install --no-cache-dir -r requirements.txt
-
+RUN python -c "import language_tool_python; language_tool_python.LanguageTool('en-US')"
 COPY . .
 CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
