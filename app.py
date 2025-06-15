@@ -1,4 +1,4 @@
-# import language_tool_python
+import language_tool_python
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -11,13 +11,12 @@ load_dotenv()
 app = Flask(__name__)
 
 CORS(app)
-
+grammar_tool = None 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 HEADERS = {
     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
     "Content-Type": "application/json",
-    "HTTP-Referer": f"http://127.0.0.1:5000/chat"
 }
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 # tool = language_tool_python.LanguageTool('en-US')
@@ -26,9 +25,9 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 def home():
     return render_template("index.html")
 
-@app.route('/manifest.json')
-def serve_manifest():
-    return app.send_static_file('manifest.json')
+# @app.route('/manifest.json')
+# def serve_manifest():
+#     return app.send_static_file('manifest.json')
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -67,30 +66,37 @@ def chat():
         print(f"An unexpected error occurred: {e}")
         return jsonify({"error": str(e)}), 500
     
-# @app.route("/check_grammar", methods=["POST"])
-# def check_grammar():
-#     data = request.json
-#     text_to_check = data.get('text')
+@app.route("/check_grammar", methods=["POST"])
+def check_grammar():
+    global grammar_tool
 
-#     if not text_to_check:
-#         return jsonify({"error": "No text provided"}), 400
+    # --- LAZY LOADING ---
+    if grammar_tool is None:
+        print("Initializing LanguageTool for the first time...")
+        grammar_tool = language_tool_python.LanguageTool('en-US')
+        print("LanguageTool initialized.")
+    # --- END OF LAZY LOADING ---
 
-#     try:
-#         matches = tool.check(text_to_check)
-#         corrections = []
-#         for match in matches:
-#             corrections.append({
-#                 'message': match.message,
-#                 'replacements': match.replacements,
-#                 'offset': match.offset,
-#                 'length': match.errorLength,
-#                 'context': match.context
-#             })
-            
-#         return jsonify({'corrections': corrections})
-#     except Exception as e:
-#         print(f"Grammar check error: {e}")
-#         return jsonify({"error": "Failed to check grammar"}), 500
+    data = request.json
+    text_to_check = data.get('text')
+    if not text_to_check:
+        return jsonify({"error": "No text provided"}), 400
+    try:
+        matches = grammar_tool.check(text_to_check)
+        corrections = []
+        for match in matches:
+            corrections.append({
+                'message': match.message,
+                'replacements': match.replacements,
+                'offset': match.offset,
+                'length': match.errorLength,
+                'context': match.context
+            })
+        return jsonify({'corrections': corrections})
+    except Exception as e:
+        print(f"Grammar check error: {e}")
+        return jsonify({"error": "Failed to check grammar"}), 500
+
 
 # @app.route("/analyze_fluency", methods=["POST"])
 # def analyze_fluency():
