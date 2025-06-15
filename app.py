@@ -8,7 +8,7 @@ import language_tool_python
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://celebrated-hotteok-616c56.netlify.app"}})
+CORS(app)
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
@@ -18,7 +18,6 @@ HEADERS = {
 }
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# --- THE NEW, SAFER WAY TO HANDLE THE GRAMMAR TOOL ---
 def get_grammar_tool():
     """
     Gets the grammar tool instance. Creates it if it doesn't exist in the
@@ -29,11 +28,7 @@ def get_grammar_tool():
         g.grammar_tool = language_tool_python.LanguageTool('en-US')
         print("LanguageTool initialized.")
     return g.grammar_tool
-# --- END OF NEW METHOD ---
 
-@app.route("/")
-def home():
-    return app.send_static_file('index.html')
 
 @app.route("/chat", methods=["POST"])
 def chat():
