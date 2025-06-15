@@ -4,7 +4,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import requests
-import librosa
+# import librosa
 
 load_dotenv()
 
@@ -92,38 +92,38 @@ def check_grammar():
         print(f"Grammar check error: {e}")
         return jsonify({"error": "Failed to check grammar"}), 500
 
-@app.route("/analyze_fluency", methods=["POST"])
-def analyze_fluency():
-    if 'audio_file' not in request.files:
-        return jsonify({"error": "No audio file found"}), 400
+# @app.route("/analyze_fluency", methods=["POST"])
+# def analyze_fluency():
+#     if 'audio_file' not in request.files:
+#         return jsonify({"error": "No audio file found"}), 400
 
-    audio_file = request.files['audio_file']
+#     audio_file = request.files['audio_file']
     
-    try:
-        # Load the audio data directly from the file object using soundfile
-        # Librosa's load function can take a file-like object
-        y, sr = librosa.load(audio_file, sr=None) # sr=None preserves the original sample rate
+#     try:
+#         # Load the audio data directly from the file object using soundfile
+#         # Librosa's load function can take a file-like object
+#         y, sr = librosa.load(audio_file, sr=None) # sr=None preserves the original sample rate
 
-        # Calculate total duration in seconds
-        duration = librosa.get_duration(y=y, sr=sr)
+#         # Calculate total duration in seconds
+#         duration = librosa.get_duration(y=y, sr=sr)
 
-        # Find the silent parts. `top_db=40` means anything 40dB below the max is silence.
-        non_silent_intervals = librosa.effects.split(y, top_db=40)
+#         # Find the silent parts. `top_db=40` means anything 40dB below the max is silence.
+#         non_silent_intervals = librosa.effects.split(y, top_db=40)
 
-        speaking_time = sum(interval[1] - interval[0] for interval in non_silent_intervals) / sr
-        num_pauses = len(non_silent_intervals) - 1 if len(non_silent_intervals) > 0 else 0
-        fluency_score = (speaking_time / duration) * 100 if duration > 0 else 0
+#         speaking_time = sum(interval[1] - interval[0] for interval in non_silent_intervals) / sr
+#         num_pauses = len(non_silent_intervals) - 1 if len(non_silent_intervals) > 0 else 0
+#         fluency_score = (speaking_time / duration) * 100 if duration > 0 else 0
 
-        return jsonify({
-            "duration": round(duration, 2),
-            "speaking_time": round(speaking_time, 2),
-            "num_pauses": num_pauses,
-            "fluency_score": round(fluency_score, 2)
-        })
+#         return jsonify({
+#             "duration": round(duration, 2),
+#             "speaking_time": round(speaking_time, 2),
+#             "num_pauses": num_pauses,
+#             "fluency_score": round(fluency_score, 2)
+#         })
 
-    except Exception as e:
-        print(f"Audio analysis error: {e}")
-        return jsonify({"error": "Failed to analyze audio"}), 500
+#     except Exception as e:
+#         print(f"Audio analysis error: {e}")
+#         return jsonify({"error": "Failed to analyze audio"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
