@@ -33,8 +33,7 @@ def get_grammar_tool():
 
 @app.route("/")
 def home():
-    # A simple health check endpoint for the deployed API
-    return "Spira Backend is live and running."
+    return app.send_static_file('index.html')
 
 @app.route("/chat", methods=["POST"])
 def chat():
