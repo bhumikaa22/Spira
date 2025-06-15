@@ -66,31 +66,31 @@ async function startVoiceInput() {
         return;
     }
 
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-    } catch (err) {
-        console.error("Error accessing microphone:", err);
-        status.textContent = "Could not access microphone.";
-        return;
-    }
+    // try {
+    //     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    //     mediaRecorder = new MediaRecorder(stream);
+    // } catch (err) {
+    //     console.error("Error accessing microphone:", err);
+    //     status.textContent = "Could not access microphone.";
+    //     return;
+    // }
 
-    mediaRecorder.ondataavailable = event => {
-        audioChunks.push(event.data);
-    };
+    // mediaRecorder.ondataavailable = event => {
+    //     audioChunks.push(event.data);
+    // };
 
-    mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-        analyzeAudioFluency(audioBlob);
-        audioChunks = []; // Reset for next recording
-    };
+    // mediaRecorder.onstop = () => {
+    //     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    //     analyzeAudioFluency(audioBlob);
+    //     audioChunks = []; // Reset for next recording
+    // };
 
     const recognition = new webkitSpeechRecognition();
     recognition.lang = "en-US";
     recognition.interimResults = false;
 
     // Start both recording and recognition
-    mediaRecorder.start();
+    // mediaRecorder.start();
     recognition.start();
     status.textContent = "🎤 Listening...";
     micBtn.disabled = true;
@@ -104,15 +104,15 @@ async function startVoiceInput() {
     recognition.onerror = function(event) {
         console.error("Voice recognition error: ", event.error);
         status.textContent = "Error: " + event.error;
-        if (mediaRecorder.state === "recording") {
-            mediaRecorder.stop();
-        }
+        // if (mediaRecorder.state === "recording") {
+        //     mediaRecorder.stop();
+        // }
     };
 
     recognition.onend = function() {
-        if (mediaRecorder.state === "recording") {
-            mediaRecorder.stop();
-        }
+        // if (mediaRecorder.state === "recording") {
+        //     mediaRecorder.stop();
+        // }
         micBtn.disabled = false;
         setTimeout(() => { status.textContent = ""; }, 1000);
     };
