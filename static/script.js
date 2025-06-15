@@ -27,7 +27,7 @@ async function sendMessage() {
     userInputElem.value = ""; 
 
     try {
-        const response = await fetch(`${BACKEND_URL}/chat`, {
+        const response = await fetch("https://spira.onrender.com/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -140,7 +140,7 @@ async function analyzeAudioFluency(audioBlob) {
 
 async function getGrammarFeedback(text) {
     try {
-        const response = await fetch(`${BACKEND_URL}/check_grammar`, {
+        const response = await fetch("https://spira.onrender.com/check_grammar", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text: text })
