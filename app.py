@@ -1,4 +1,4 @@
-import language_tool_python
+# import language_tool_python
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -20,7 +20,7 @@ HEADERS = {
     "HTTP-Referer": f"http://127.0.0.1:5000/chat"
 }
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
-tool = language_tool_python.LanguageTool('en-US')
+# tool = language_tool_python.LanguageTool('en-US')
 
 @app.route("/")
 def home():
@@ -67,30 +67,30 @@ def chat():
         print(f"An unexpected error occurred: {e}")
         return jsonify({"error": str(e)}), 500
     
-@app.route("/check_grammar", methods=["POST"])
-def check_grammar():
-    data = request.json
-    text_to_check = data.get('text')
+# @app.route("/check_grammar", methods=["POST"])
+# def check_grammar():
+#     data = request.json
+#     text_to_check = data.get('text')
 
-    if not text_to_check:
-        return jsonify({"error": "No text provided"}), 400
+#     if not text_to_check:
+#         return jsonify({"error": "No text provided"}), 400
 
-    try:
-        matches = tool.check(text_to_check)
-        corrections = []
-        for match in matches:
-            corrections.append({
-                'message': match.message,
-                'replacements': match.replacements,
-                'offset': match.offset,
-                'length': match.errorLength,
-                'context': match.context
-            })
+#     try:
+#         matches = tool.check(text_to_check)
+#         corrections = []
+#         for match in matches:
+#             corrections.append({
+#                 'message': match.message,
+#                 'replacements': match.replacements,
+#                 'offset': match.offset,
+#                 'length': match.errorLength,
+#                 'context': match.context
+#             })
             
-        return jsonify({'corrections': corrections})
-    except Exception as e:
-        print(f"Grammar check error: {e}")
-        return jsonify({"error": "Failed to check grammar"}), 500
+#         return jsonify({'corrections': corrections})
+#     except Exception as e:
+#         print(f"Grammar check error: {e}")
+#         return jsonify({"error": "Failed to check grammar"}), 500
 
 # @app.route("/analyze_fluency", methods=["POST"])
 # def analyze_fluency():
